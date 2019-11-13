@@ -1,12 +1,12 @@
 let socket;
 
-function init(url) {
+function init(url)  {
   socket = new WebSocket(url);
   console.log('connecting...');
 }
 
 function registerOpenHandler(handlerFunction) {
-  socket.onopen = function() {
+  socket.onopen = () => {
     console.log('open');
     handlerFunction();
   };
@@ -28,5 +28,5 @@ export default {
   init,
   registerOpenHandler,
   registerMessageHandler,
-  sendMessage
+  sendMessage 
 }

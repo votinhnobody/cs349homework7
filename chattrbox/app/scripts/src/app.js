@@ -1,56 +1,38 @@
 import socket from './ws-client';
-import {UserStore} from './storage';
-import {ChatForm, ChatList, promptForUsername} from './dom';
-
-let userStore = new UserStore('x-chattrbox/u');
 
 class ChatApp {
   constructor() {
-    this.username = userStore.get();
-    if (!this.username) {
-      this.username = promptForUsername();
-      userStore.set(this.username);
-    }
-
-    this.chatForm = new ChatForm('#js-chat-form', '#js-message-input');
-    this.chatList = new ChatList('#js-message-list', this.username);
+    // console.log('Hello ES6!');
     socket.init('ws://localhost:3001');
+
     socket.registerOpenHandler(() => {
-      this.chatForm.init((data) => {
-        let message = new ChatMessage(data);
-        socket.sendMessage(message.toObj());
-      });
+      let message = new ChatMessage({ message: 'pow!' });
+      socket.sendMessage(message.serialize());
     });
     socket.registerMessageHandler((data) => {
-      console.log(data);
-      // Create a new instance of `ChatMessage` with the incoming data from the
-      // WebSockets server
-      let message = new ChatMessage(data);
-      // then, call this.chatList.drawMessage() with the new message instance
-      this.chatList.drawMessage(message.toObj());
+      // console.log(data);
     });
   }
 }
 
-class ChatMessage {
-  constructor(data) {
-    if (typeof data === 'string') {
-      data = {
-        message: data
-      };
-    }
-    this.username = data.user || userStore.get();
-    this.message = data.message;
-    this.timestamp = data.timestamp || (new Date()).getTime();
-  }
 
-  toObj() {
-    return {
-      user: this.username,
-      message: this.message,
-      timestamp: this.timestamp
-    };
-  }
+class ChatMessage {
+   constructor({
+     message: m,
+     user: u='batman',
+     timestamp: t=(new Date()).getTime()
+   }) {
+       this.message = m;
+       this.user = u;
+       this.timestamp = t;
+     }
+     serialize() {
+       return {
+         user: this.user,
+         message: this.message,
+         timestamp: this.timestamp
+       };
+     }
 }
 
 export default ChatApp;
